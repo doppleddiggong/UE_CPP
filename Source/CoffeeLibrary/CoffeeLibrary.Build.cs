@@ -2,13 +2,13 @@
 
 using UnrealBuildTool;
 
-public class UE_CPP : ModuleRules
+public class CoffeeLibrary : ModuleRules
 {
-	public UE_CPP(ReadOnlyTargetRules Target) : base(Target)
+	public CoffeeLibrary(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "CoffeeLibrary" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		

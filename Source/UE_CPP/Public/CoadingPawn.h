@@ -27,11 +27,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-
-	
-
 	
 public:
+	UPROPERTY()
+	class UInputMappingContext* MappingContext;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite )
 	int32 Number = 123456789;
 
@@ -58,4 +58,7 @@ public:
 	{
 		return a + b;
 	}
+
+private:
+	void SetupInputMapping() const;
 };
