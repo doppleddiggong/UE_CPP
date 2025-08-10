@@ -1,16 +1,19 @@
+
 #include "CoadingPawn.h"
 #include "ULog.h"
 
-#include "CoffeeLibrary.h"
-
 #include "Kismet/GameplayStatics.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
+
 #include "Components/InputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "InputMappingContext.h"
+
+#include "Bullet.h"
+
 
 #define MAPPING_PATH	TEXT("/Game/CustomContents/Inputs/IMC_PlayerInput.IMC_PlayerInput")
 
-// Sets default values
 ACoadingPawn::ACoadingPawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,13 +23,12 @@ ACoadingPawn::ACoadingPawn()
 		MappingContext = MappingFinder.Object;
 }
 
-// Called when the game starts or when spawned
 void ACoadingPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
 	this->SetupInputMapping();
-	
+/*
 	{
 		// --- ULOG 기능 테스트 ---
 		ULOG( Warning, "Hello World");
@@ -47,9 +49,9 @@ void ACoadingPawn::BeginPlay()
 		ULOG(Warning, "--- Testing CoffeeLibrary::CommonUtil::InBounds ---");
 
 		// MyArrayCount는 'InBounds' 함수를 테스트하기 위한 가상의 배열 크기입니다.
-		const int32 MyArrayCount = 5;
-		const int32 TestIndex1 = 3;  // 유효한 인덱스
-		const int32 TestIndex2 = 5;  // 유효하지 않은 인덱스
+		constexpr int32 MyArrayCount = 5;
+		constexpr int32 TestIndex1 = 3;  // 유효한 인덱스
+		constexpr int32 TestIndex2 = 5;  // 유효하지 않은 인덱스
 
 		const bool bIsIndex1InBounds = UCoffeeCommonUtil::InBounds(TestIndex1, MyArrayCount);
 		ULOG(Warning, "Is index %d in bounds [0..%d)? -> %s",
@@ -58,6 +60,30 @@ void ACoadingPawn::BeginPlay()
 		const bool bIsIndex2InBounds = UCoffeeCommonUtil::InBounds(TestIndex2, MyArrayCount);
 		ULOG(Warning, "Is index %d in bounds [0..%d)? -> %s",
 			TestIndex2, MyArrayCount, bIsIndex2InBounds ? TEXT("True") : TEXT("False"));
+	}
+	*/
+}
+
+void ACoadingPawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	this->UpdateMove(DeltaTime);
+}
+
+void ACoadingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if ( UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInput->BindAction(HorizontalAction, ETriggerEvent::Triggered, this, &ACoadingPawn::OnHorizontalAction );
+		EnhancedInput->BindAction(HorizontalAction, ETriggerEvent::Completed , this, &ACoadingPawn::OnHorizontalAction );
+
+		EnhancedInput->BindAction(VerticalAction, ETriggerEvent::Triggered, this, &ACoadingPawn::OnVerticalAction );
+		EnhancedInput->BindAction(VerticalAction, ETriggerEvent::Completed, this, &ACoadingPawn::OnVerticalAction );
+
+		EnhancedInput->BindAction(FireAction, ETriggerEvent::Started, this, &ACoadingPawn::OnFireAction);
 	}
 }
 
@@ -74,24 +100,65 @@ void ACoadingPawn::SetupInputMapping() const
 		if (const auto Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerCtrl->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(MappingContext, 0);
-			return;
 		}
 	}
 }
 
-// Called every frame
-void ACoadingPawn::Tick(float DeltaTime)
+void ACoadingPawn::UpdateMove(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (GEngine)
+	{
+		FString Msg = FString::Printf(TEXT("Horizontal: %.2f, Vertical: %.2f"), HorizontalValue, VerticalValue);
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Orange, Msg);
+	}
+
+	auto Move = FVector(0.0f, HorizontalValue, VerticalValue);
+	if ( Move.IsNearlyZero() == false )
+		Move = Move.GetSafeNormal() * MoveSpd * DeltaTime;
+	
+	this->SetActorLocation( GetActorLocation() + Move );
 }
 
-// Called to bind functionality to input
-void ACoadingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ACoadingPawn::OnHorizontalAction(const FInputActionValue& Value)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	float AxisValue = Value.Get<float>();
+
+	this->HorizontalValue = AxisValue;
+	ULOG( Warning, "OnHorizontalAction : %f", HorizontalValue);
+	
+	if (FMath::Abs(AxisValue) > KINDA_SMALL_NUMBER)
+	{
+		AddMovementInput(GetActorRightVector(), AxisValue);
+	}
 }
 
-int32 ACoadingPawn::NewMyAdd(int32 a, int32 b)
+void ACoadingPawn::OnVerticalAction(const FInputActionValue& Value)
 {
-	return a + b;
+	float AxisValue = Value.Get<float>();
+
+	this->VerticalValue = AxisValue;
+	ULOG( Warning, "OnVerticalAction : %f", VerticalValue);
+
+	if (FMath::Abs(AxisValue) > KINDA_SMALL_NUMBER)
+	{
+		AddMovementInput(GetActorUpVector(), AxisValue);
+	}
+}
+
+void ACoadingPawn::OnFireAction(const FInputActionValue& Value)
+{
+	if ( BulletClass == nullptr )
+		return;
+	
+	UWorld* World = GetWorld();
+	auto SpawnLocation = FirePos->GetComponentLocation();
+	auto SpawnRotation = FirePos->GetComponentRotation();
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	
+	ABullet* Bullet = World->SpawnActor<ABullet>(BulletClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	UGameplayStatics::PlaySound2D(World, FireSound);
 }

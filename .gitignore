@@ -73,3 +73,8 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+
+# Visual Studio user-specific files
+*.user
+*.DotSettings.user

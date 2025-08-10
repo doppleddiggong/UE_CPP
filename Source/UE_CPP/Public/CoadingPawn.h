@@ -1,10 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
 #include "CoadingPawn.generated.h"
+
+struct FInputActionValue;
 
 UCLASS()
 class UE_CPP_API ACoadingPawn : public APawn
@@ -25,40 +28,40 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-
 	
 public:
 	UPROPERTY()
 	class UInputMappingContext* MappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ToolTip="이동 속도"))
+	float MoveSpd = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* HorizontalAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* VerticalAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="발사 위치"))
+	USceneComponent* FirePos;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite )
-	int32 Number = 123456789;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="생설될 총알 객체"))
+	TSubclassOf<AActor> BulletClass;
 
-	UPROPERTY(EditInstanceOnly )
-	float Pi = 3.14f;
-
-	UPROPERTY(EditAnywhere)
-	int64 LongValue = LONG_MAX;
-
-	UPROPERTY(VisibleDefaultsOnly )
-	double DoubleValue = DBL_MAX;
-
-	UPROPERTY(VisibleInstanceOnly )
-	bool IsGood = false;
-
-	UPROPERTY(VisibleAnywhere )
-	FString MyName = TEXT("dopple");
-
-	UFUNCTION(BlueprintCallable, Category="ACoadingPawn")
-	int32 NewMyAdd(int32 a, int32 b);
-
-	UFUNCTION(BlueprintCallable, Category="ACoadingPawn")
-	FORCEINLINE int32 MyAdd(int32 a, int32 b)
-	{
-		return a + b;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="발사 효과음"))
+	class USoundBase* FireSound;
 
 private:
 	void SetupInputMapping() const;
+	void OnHorizontalAction(const FInputActionValue& Value);
+	void OnVerticalAction(const FInputActionValue& Value);
+	void OnFireAction(const FInputActionValue& Value);
+
+	void UpdateMove(float DeltaTime);
+
+	float HorizontalValue;
+	float VerticalValue;
 };
