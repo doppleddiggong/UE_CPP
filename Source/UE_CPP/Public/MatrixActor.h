@@ -74,7 +74,7 @@ private:
 private:
 	void InitData();
 	void ApplyTransformation();
-	void UpdateTransform(float DeltaTime);
+	void UpdateTransform(const float DeltaTime);
 
 	void GenerateTargetTransform();
 	

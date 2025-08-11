@@ -20,9 +20,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "In Bounds"))
 	static bool InBounds(const int32 Index, const int32 Count);
 
-	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "GetNowTimestamp"))
-	static int64 GetNowTimestamp();
+	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "NowTimestamp"))
+	static int64 GetNowTimestamp();	
 
+
+	static void TestULog();
+	static void TestInBound();
+	
 	/**
 	 * @brief 액터에 부착된 특정 이름의 컴포넌트를 찾습니다.
 	 * @tparam T 찾고자 하는 컴포넌트의 타입 (예: USceneComponent, UStaticMeshComponent 등)
@@ -35,10 +39,10 @@ public:
 	{
 		if (Owner == nullptr)
 			return nullptr;
-	
+
 		TArray<T*> Components;
 		Owner->GetComponents<T>(Components);
-	
+
 		for (T* Comp : Components)
 		{
 			if (Comp && Comp->GetFName() == ComponentName)
@@ -46,7 +50,43 @@ public:
 				return Comp;
 			}
 		}
-		
+	
 		return nullptr;
 	}
+
+	template<typename T>
+	static T* FindComponentByNameRecursive(AActor* Owner, const FName& ComponentName)
+	{
+		if (Owner == nullptr)
+			return nullptr;
+
+		// 1. 현재 Actor에서 먼저 검색
+		TArray<T*> Components;
+		Owner->GetComponents<T>(Components);
+
+		for (T* Comp : Components)
+		{
+			if (Comp && Comp->GetFName() == ComponentName)
+			{
+				return Comp;
+			}
+		}
+
+		TArray<AActor*> AttachedActors;
+		Owner->GetAttachedActors(AttachedActors);
+
+		for (AActor* ChildActor : AttachedActors)
+		{
+			if (ChildActor)
+			{
+				if (T* Found = FindComponentByNameRecursive<T>(ChildActor, ComponentName))
+				{
+					return Found;
+				}
+			}
+		}
+
+		return nullptr;
+	};
 };
+

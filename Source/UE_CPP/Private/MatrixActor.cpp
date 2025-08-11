@@ -202,7 +202,7 @@ void AMatrixActor::GenerateTargetTransform()
 	TargetTransform.SetScale3D(TargetScale);
 }
 
-void AMatrixActor::UpdateTransform(float DeltaTime)
+void AMatrixActor::UpdateTransform(const float DeltaTime)
 {
 	// LerpAlpha 증가 (0~1)
 	LerpAlpha = FMath::Clamp(LerpAlpha + DeltaTime / Duration , 0.f, 1.f);

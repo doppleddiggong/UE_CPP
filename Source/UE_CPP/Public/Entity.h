@@ -84,7 +84,7 @@ private:
 	void ApplyTransformation();
 
 	void StartTransformInterpolation(const FMatrix& ResultMatrix);
-	void UpdateTransformInterpolation(float DeltaTime);
+	void UpdateTransformInterpolation(const float DeltaTime);
 	
 	static FString GetTransformModeName(ETransformOrder Mode)
 	{

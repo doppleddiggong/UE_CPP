@@ -39,7 +39,7 @@ void AEntity::InitData()
 	TargetScale = StartScale;
 }
 
-void AEntity::Tick(float DeltaTime)
+void AEntity::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

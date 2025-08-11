@@ -16,6 +16,7 @@
 
 
 #define MAPPING_PATH	TEXT("/Game/CustomContents/Inputs/IMC_PlayerInput.IMC_PlayerInput")
+#define FIRE_PATH	TEXT("Scene_Fire")
 
 ACoadingPawn::ACoadingPawn()
 {
@@ -30,74 +31,11 @@ void ACoadingPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//
-	// // 컬러값에서 r,g,b 뽑아내기
-	// int32 color = 0xffaaccee;
-	// int32 r = color >> 24; // 0xff
-	// int32 g = (color >> 16) & r; // 0xffaa
-	// int32 b = (color >> 8) & r;
-	// int32 a = (color >> 8);
-	//
-	// int32 color2 = 0;
-	// color2 = (r << 24) | (g << 16 ) | (b << 8 ) | a ;
-
-	
-	// ULOG( Warning, "%d, %d, %d",  r, g, b);
-		
-	// FDateTime DateTime(1986,11,8);
-	// ULOG( Warning, "%d",  DateTime.GetYear());
-	// ULOG( Warning, "%d",  DateTime.GetMonth());
-	// ULOG( Warning, "%d",  DateTime.GetDay());
-
-	
-	ULOG( Warning, "GetNowTimestamp :  %lld", UCoffeeCommonUtil::GetNowTimestamp() );
-
-
-	// int32 ymd = 19'861'108;
-	// int32 year = ymd/10'000;
-	// int32 month =(ymd -year*10000)/1'00;
-	// int32 day = (ymd -year*10000 - month*100);
-	// ULOG( Warning, "%d",  ymd);
-	// ULOG( Warning, "%d",  year);
-	// ULOG( Warning, "%d",  month);
-	// ULOG( Warning, "%d",  day);
-	
-
 	this->SetupInputMapping();
-/*
-	{
-		// --- ULOG 기능 테스트 ---
-		ULOG( Warning, "Hello World");
-		ULOG( Warning, "Number : %d", Number);
-		// 결과: "9,999" (en-US 기준)
-		FText LocalizedNumber = FText::AsNumber(Number);
-		ULOG( Warning, "#,##0 : %s", *LocalizedNumber.ToString());
-		ULOG( Warning, "pi : %f", Pi);
-		ULOG( Warning, "longValue : %lld", LongValue);
-		ULOG( Warning, "doubleValue : %f", DoubleValue);
-		ULOG( Warning, "isGood : %d", IsGood);
-		ULOG( Warning, "myName : %s", *MyName);
-		ULOG( Warning, "myName : %s", TEXT("배주백"));
-	}
+	FirePos = UCoffeeCommonUtil::FindComponentByNameRecursive<USceneComponent>(this, FIRE_PATH);
 
-	{
-		// --- CoffeeLibrary 기능 테스트 ---
-		ULOG(Warning, "--- Testing CoffeeLibrary::CommonUtil::InBounds ---");
-
-		// MyArrayCount는 'InBounds' 함수를 테스트하기 위한 가상의 배열 크기입니다.
-		constexpr int32 MyArrayCount = 5;
-		constexpr int32 TestIndex1 = 3;  // 유효한 인덱스
-		constexpr int32 TestIndex2 = 5;  // 유효하지 않은 인덱스
-
-		const bool bIsIndex1InBounds = UCoffeeCommonUtil::InBounds(TestIndex1, MyArrayCount);
-		ULOG(Warning, "Is index %d in bounds [0..%d)? -> %s",
-			TestIndex1, MyArrayCount, bIsIndex1InBounds ? TEXT("True") : TEXT("False"));
-
-		const bool bIsIndex2InBounds = UCoffeeCommonUtil::InBounds(TestIndex2, MyArrayCount);
-		ULOG(Warning, "Is index %d in bounds [0..%d)? -> %s",
-			TestIndex2, MyArrayCount, bIsIndex2InBounds ? TEXT("True") : TEXT("False"));
-	}
-	*/
+	UCoffeeCommonUtil::TestInBound();
+	UCoffeeCommonUtil::TestULog();
 }
 
 void ACoadingPawn::Tick(float DeltaTime)
@@ -185,6 +123,12 @@ void ACoadingPawn::OnFireAction(const FInputActionValue& Value)
 {
 	if ( BulletClass == nullptr )
 		return;
+
+	if ( FirePos == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Orange, "FirePos is nullptr");
+		return;
+	}
 	
 	UWorld* World = GetWorld();
 	auto SpawnLocation = FirePos->GetComponentLocation();
