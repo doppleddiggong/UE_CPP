@@ -12,6 +12,31 @@ AEntity::AEntity()
 void AEntity::BeginPlay()
 {
 	Super::BeginPlay();
+
+	this->InitData();
+}
+
+void AEntity::InitData()
+{
+	CurrentOrder = ETransformOrder::E_Identity;
+	PreviousTransformOrder = CurrentOrder;
+
+	TranslationMatrix = FTranslationMatrix(Translation);
+	RotationMatrix = FRotationMatrix::Make(Rotation);
+	ScaleMatrix = FScaleMatrix(Scale);
+
+	// 일단 초기화
+	SetActorLocation(FVector::ZeroVector);
+	SetActorRotation(FRotator::ZeroRotator);
+	SetActorScale3D(FVector::OneVector);
+
+	StartLocation = GetActorLocation();
+	StartRotation = GetActorRotation();
+	StartScale = GetActorScale3D();
+
+	TargetLocation = StartLocation;
+	TargetRotation = StartRotation;
+	TargetScale = StartScale;
 }
 
 void AEntity::Tick(float DeltaTime)
@@ -35,20 +60,6 @@ void AEntity::Tick(float DeltaTime)
 	}
 	
 	this->UpdateTransformInterpolation(DeltaTime);
-}
-
-FString AEntity::GetTransformModeName(ETransformOrder Mode) const
-{
-	switch (Mode)
-	{
-	case ETransformOrder::E_Identity:  return TEXT("Identity");
-	case ETransformOrder::E_TRS:      return TEXT("Translation * Rotation * Scale (TRS)");
-	case ETransformOrder::E_TSR:      return TEXT("Translation * Scale * Rotation (TSR)");
-	case ETransformOrder::E_RTS:      return TEXT("Rotation * Translation * Scale (RTS)");
-	case ETransformOrder::E_SRT:      return  TEXT("Scale * Rotation * Translation (SRT)");
-	default:
-		return TEXT("Unknown Order");
-	}
 }
 
 void AEntity::ApplyTransformation()
@@ -153,8 +164,6 @@ void AEntity::StartTransformInterpolation(const FMatrix& ResultMatrix)
 	TargetScale.X = ResultMatrix.GetScaledAxis(EAxis::X).Size();
 	TargetScale.Y = ResultMatrix.GetScaledAxis(EAxis::Y).Size();
 	TargetScale.Z = ResultMatrix.GetScaledAxis(EAxis::Z).Size();
-
-	
 
 	InterpElapsedTime = 0.f;
 	InterpStep = 0;

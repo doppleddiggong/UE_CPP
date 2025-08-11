@@ -10,9 +10,25 @@ AMatrixActor::AMatrixActor()
 void AMatrixActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	this->InitData();
 }
 
-// Called every frame
+void AMatrixActor::InitData()
+{
+	PreviousOrder = EMatrixDemoType::E_Identity;
+	CurrentOrder = EMatrixDemoType::E_Identity;
+	
+	SetActorLocation(FVector::ZeroVector);
+	SetActorRotation(FRotator::ZeroRotator);
+	SetActorScale3D(FVector::OneVector);
+
+	TranslationMatrix = FTranslationMatrix(Translation);
+	RotationMatrix = FRotationMatrix::Make(Rotation);
+	ScaleMatrix = FScaleMatrix(Scale);
+	ResultMatrix = FMatrix::Identity;
+}
+
 void AMatrixActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -25,24 +41,16 @@ void AMatrixActor::Tick(float DeltaTime)
 		SetActorLocation(FVector::ZeroVector);
 		SetActorRotation(FRotator::ZeroRotator);
 		SetActorScale3D(FVector::OneVector);
+
+		TranslationMatrix = FTranslationMatrix(Translation);
+		RotationMatrix = FRotationMatrix::Make(Rotation);
+		ScaleMatrix = FScaleMatrix(Scale);
+		ResultMatrix = FMatrix::Identity;
 		
 		ApplyTransformation();
 	}
-	
-	this->UpdateTransformInterpolation(DeltaTime);
-}
 
-FString AMatrixActor::GetTransformModeName(EMatrixDemoType Mode) const
-{
-	switch (Mode)
-	{
-	case EMatrixDemoType::E_Identity:	return TEXT("Identity");
-	case EMatrixDemoType::E_Rotation:   return TEXT("Rotation");
-	case EMatrixDemoType::E_Reflection: return TEXT("TReflection");
-	case EMatrixDemoType::E_Orthogonal: return TEXT("Orthogonal");
-	default:
-		return TEXT("Unknown Order");
-	}
+	UpdateTransform(DeltaTime);
 }
 
 void AMatrixActor::ApplyTransformation()
@@ -61,64 +69,154 @@ void AMatrixActor::ApplyTransformation()
 		SetActorLocation(FVector::ZeroVector);
 		SetActorRotation(FRotator::ZeroRotator);
 		SetActorScale3D(FVector::OneVector);
+
+		TargetTransform.SetLocation(FVector::ZeroVector);
+		TargetTransform.SetRotation(FQuat::Identity);
+		TargetTransform.SetScale3D(FVector::OneVector);
 		break;
 		
 	case EMatrixDemoType::E_Rotation:
 		{
-			FVector Translation(200.f, 0.f, 0.f);
-			FRotator Rotation(0.f, 90.f, 0.f);
-			FVector Scale(1.f, 1.f, 1.f);
-
-			TranslationMatrix = FTranslationMatrix(Translation);
-			RotationMatrix = FRotationMatrix::Make(Rotation);
-			ScaleMatrix = FScaleMatrix(Scale);
-
+			ResultMatrix = FMatrix::Identity;
 			ResultMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();
 		}
 		break;
 		
-	case EMatrixDemoType::E_Reflection:
+	case EMatrixDemoType::E_Reflection_X:
 		{
-			// 단순 Mirror 예시
-			FVector Translation(0.f, 200.f, 0.f);
-			FVector MirrorAxis(1.f, 0.f, 0.f);
+			FMatrix ReflectionMatrix = FMatrix::Identity;
+			// X축 대칭 (X 성분 부호 반전)
+			ReflectionMatrix.M[0][0] = -1.0f;
 
-			TranslationMatrix = FTranslationMatrix(Translation);
-			RotationMatrix = FMatrix::Identity;
-			ScaleMatrix = FScaleMatrix(FVector(1.f, -1.f, 1.f)); // Y축 반전
-
-			ResultMatrix = TranslationMatrix * ScaleMatrix;
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * ReflectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();
 		}
 		break;
 		
-	case EMatrixDemoType::E_Orthogonal:
+	case EMatrixDemoType::E_Reflection_Y:
 		{
-			// 직교 행렬 예시 (Quat + Matrix)
-			FQuat Quat = FRotator(0.f, 45.f, 0.f).Quaternion();
-			FMatrix QuatMatrix = FQuatRotationMatrix(Quat);
-			TranslationMatrix = FTranslationMatrix(FVector(0.f, 0.f, 200.f));
-			RotationMatrix = QuatMatrix;
-			ScaleMatrix = FScaleMatrix(FVector(1.f, 1.f, 1.f));
+			FMatrix ReflectionMatrix = FMatrix::Identity;
+			// Y축 대칭( Y 성분 부호 반전)
+			ReflectionMatrix.M[1][1] = -1.0f;
 
-			ResultMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix;
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * ReflectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();		
+		}
+		break;
+		
+	case EMatrixDemoType::E_Reflection_Z:
+		{
+			FMatrix ReflectionMatrix = FMatrix::Identity;
+			// Z축 대칭( Z 성분 부호 반전)
+			ReflectionMatrix.M[2][2] = -1.0f;
+
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * ReflectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();					
+		}
+		break;
+
+	case EMatrixDemoType::E_Orthogonal_X:
+		{
+			FMatrix OrthogonalProjectionMatrix = FMatrix::Identity;
+			// X축 방향으로 투영 (X 좌표 0으로 고정)
+			OrthogonalProjectionMatrix.M[0][0] = 0.0f;
+
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * OrthogonalProjectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();
+		}
+		break;
+
+	case EMatrixDemoType::E_Orthogonal_Y:
+		{
+			FMatrix OrthogonalProjectionMatrix = FMatrix::Identity;
+			// Y축 방향으로 투영 (Y 좌표 0으로 고정)
+			OrthogonalProjectionMatrix.M[1][1] = 0.0f;
+
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * OrthogonalProjectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();
+		}
+		break;
+
+		
+	case EMatrixDemoType::E_Orthogonal_Z:
+		{
+			FMatrix OrthogonalProjectionMatrix = FMatrix::Identity;
+			// Z축 방향으로 투영 (Z 좌표 0으로 고정)
+			OrthogonalProjectionMatrix.M[2][2] = 0.0f;
+
+			ResultMatrix = FMatrix::Identity;
+			ResultMatrix = TranslationMatrix * OrthogonalProjectionMatrix * RotationMatrix * ScaleMatrix;
+			
+			GenerateTargetTransform();
+		}
+		break;
+
+	default:
+		{
+			ResultMatrix = FMatrix::Identity;
+    	
+			SetActorLocation(FVector::ZeroVector);
+			SetActorRotation(FRotator::ZeroRotator);
+			SetActorScale3D(FVector::OneVector);
 		}
 		break;
 	}
+}
 
-	// 위치 추출
-	FVector NewLocation = ResultMatrix.GetOrigin();
+void AMatrixActor::GenerateTargetTransform()
+{
+	TargetLocation = ResultMatrix.GetOrigin();
 
-	// 회전 추출 (쿼터니언)
-	FQuat NewRotation(ResultMatrix);
+	const FVector ScaledX = ResultMatrix.GetScaledAxis(EAxis::X);
+	const FVector ScaledY = ResultMatrix.GetScaledAxis(EAxis::Y);
+	const FVector ScaledZ = ResultMatrix.GetScaledAxis(EAxis::Z);
 
-	// 스케일 추출
-	FVector NewScale;
-	NewScale.X = ResultMatrix.GetScaledAxis(EAxis::X).Size();
-	NewScale.Y = ResultMatrix.GetScaledAxis(EAxis::Y).Size();
-	NewScale.Z = ResultMatrix.GetScaledAxis(EAxis::Z).Size();
+	const FVector RotationX = ScaledX / Scale.X;
+	const FVector RotationY = ScaledY / Scale.Y;
+	const FVector RotationZ = ScaledZ / Scale.Z;
 
-	// 개별 적용
-	SetActorLocation(NewLocation);
-	SetActorRotation(NewRotation);
-	SetActorScale3D(NewScale);
+	FMatrix RotationOnly;
+	RotationOnly.SetAxes(&RotationX, &RotationY, &RotationZ);
+	RotationOnly.SetOrigin(FVector::ZeroVector); // 위치 정보는 0으로 설정
+	TargetRotation = RotationOnly.Rotator();
+	TargetQuat = TargetRotation.Quaternion();
+
+	TargetScale.X = ResultMatrix.GetScaledAxis(EAxis::X).Size();
+	TargetScale.Y = ResultMatrix.GetScaledAxis(EAxis::Y).Size();
+	TargetScale.Z = ResultMatrix.GetScaledAxis(EAxis::Z).Size();
+
+	TargetTransform.SetLocation(TargetLocation);
+	TargetTransform.SetRotation(TargetQuat);
+	TargetTransform.SetScale3D(TargetScale);
+}
+
+void AMatrixActor::UpdateTransform(float DeltaTime)
+{
+	// LerpAlpha 증가 (0~1)
+	LerpAlpha = FMath::Clamp(LerpAlpha + DeltaTime / Duration , 0.f, 1.f);
+
+	// 보간된 Transform 계산 (StartTransform과 TargetTransform 사이)
+	CurrentTransform.Blend(CurrentTransform, TargetTransform, LerpAlpha);
+
+	// 결과 적용
+	SetActorTransform(CurrentTransform);
+
+	// Lerp 완료 시 리셋(필요시)
+	if (LerpAlpha >= 1.f)
+	{
+		LerpAlpha = 0.f;
+		CurrentTransform = TargetTransform;
+	}
 }

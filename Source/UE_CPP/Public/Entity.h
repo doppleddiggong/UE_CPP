@@ -55,14 +55,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation Duration")
 	float StepDuration = 1.f;
 	
-	UFUNCTION(BlueprintCallable, Category="Transformation Demo")
-	void ApplyTransformation();
-	
-	FString GetTransformModeName(ETransformOrder Mode) const;
-
-	void StartTransformInterpolation(const FMatrix& ResultMatrix);
-	void UpdateTransformInterpolation(float DeltaTime);
-	
 private:
 	FMatrix TranslationMatrix;
 	FMatrix RotationMatrix;
@@ -71,7 +63,7 @@ private:
 	ETransformOrder PreviousTransformOrder = ETransformOrder::E_Identity;
 	
 	float InterpElapsedTime = 0.f;
-	int32 InterpStep = 0; // 0=위치, 1=회전, 2=스케일, 3=완료
+	int32 InterpStep = 0;
 
 	FVector StartLocation;
 	FRotator StartRotation;
@@ -86,4 +78,25 @@ private:
 		ETransformType::Rotate,
 		ETransformType::Scale
 	};
+
+private:
+	void InitData();
+	void ApplyTransformation();
+
+	void StartTransformInterpolation(const FMatrix& ResultMatrix);
+	void UpdateTransformInterpolation(float DeltaTime);
+	
+	static FString GetTransformModeName(ETransformOrder Mode)
+	{
+		switch (Mode)
+		{
+		case ETransformOrder::E_Identity:	return TEXT("Identity");
+		case ETransformOrder::E_TRS:		return TEXT("Translation * Rotation * Scale (TRS)");
+		case ETransformOrder::E_TSR:		return TEXT("Translation * Scale * Rotation (TSR)");
+		case ETransformOrder::E_RTS:		return TEXT("Rotation * Translation * Scale (RTS)");
+		case ETransformOrder::E_SRT:		return TEXT("Scale * Rotation * Translation (SRT)");
+		default:
+			return TEXT("Unknown Order");
+		}
+	}
 };
