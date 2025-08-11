@@ -1,4 +1,4 @@
-// // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
+// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #pragma once
 
@@ -48,7 +48,7 @@ public:
 	FVector Scale = FVector(2.f, 3.f, 1.f);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation Duration")
-	float Duration = 5.0f;
+	float Duration = 3.0f;
 
 	
 private:
@@ -69,7 +69,6 @@ private:
 	FVector TargetScale;
 	
 	float LerpAlpha;
-	
 
 private:
 	void InitData();
@@ -78,7 +77,7 @@ private:
 
 	void GenerateTargetTransform();
 	
-	static FString GetTransformModeName(EMatrixDemoType Mode)
+	static FString GetTransformModeName(const EMatrixDemoType Mode)
 	{
 		switch (Mode)
 		{

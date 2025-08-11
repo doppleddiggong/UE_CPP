@@ -1,4 +1,4 @@
-// // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
+// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #pragma once
 
@@ -9,11 +9,11 @@
 UENUM(BlueprintType)
 enum class ETransformOrder : uint8
 {
-	E_Identity UMETA(DisplayName = "Identity"),			// Represents no transformation, just the identity matrix
-	E_TRS UMETA(DisplayName = "Translation * Rotation * Scale"),	// Apply Scale, then Rotate, then Translate (common for local space)
-	E_TSR UMETA(DisplayName = "Translation * Scale * Rotation"),	// Apply Rotation, then Scale, then Translate
-	E_RTS UMETA(DisplayName = "Rotation * Translation * Scale"),	// Apply Scale, then Translate, then Rotate
-	E_SRT UMETA(DisplayName = "Scale * Rotation * Translation")		// Apply Translation, then Rotation, then Scale (common for world space)
+	E_Identity UMETA(DisplayName = "Identity"),					
+	E_TRS UMETA(DisplayName = "Translation * Rotation * Scale"),
+	E_TSR UMETA(DisplayName = "Translation * Scale * Rotation"),
+	E_RTS UMETA(DisplayName = "Rotation * Translation * Scale"),
+	E_SRT UMETA(DisplayName = "Scale * Rotation * Translation")	
 };
 
 enum class ETransformType : uint8
@@ -29,17 +29,15 @@ class UE_CPP_API AEntity : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AEntity();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation")
 	ETransformOrder CurrentOrder = ETransformOrder::E_Identity;
 
@@ -53,15 +51,24 @@ public:
 	FVector Scale = FVector(2.f, 3.f, 1.f);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transformation Duration")
-	float StepDuration = 1.f;
+	float StepDuration = 3.f;
 	
 private:
+	ETransformOrder PreviousTransformOrder = ETransformOrder::E_Identity;
+
+	TArray<ETransformType> TransformOrder = {
+		ETransformType::Translate,
+		ETransformType::Rotate,
+		ETransformType::Scale
+	};
+	
+	// 행렬
 	FMatrix TranslationMatrix;
 	FMatrix RotationMatrix;
 	FMatrix ScaleMatrix;
 
-	ETransformOrder PreviousTransformOrder = ETransformOrder::E_Identity;
-	
+
+	// Lerp
 	float InterpElapsedTime = 0.f;
 	int32 InterpStep = 0;
 
@@ -73,12 +80,6 @@ private:
 	FRotator TargetRotation;
 	FVector TargetScale;
 
-	TArray<ETransformType> TransformOrder = {
-		ETransformType::Translate,
-		ETransformType::Rotate,
-		ETransformType::Scale
-	};
-
 private:
 	void InitData();
 	void ApplyTransformation();
@@ -86,7 +87,7 @@ private:
 	void StartTransformInterpolation(const FMatrix& ResultMatrix);
 	void UpdateTransformInterpolation(const float DeltaTime);
 	
-	static FString GetTransformModeName(ETransformOrder Mode)
+	static FString GetTransformModeName(const ETransformOrder Mode)
 	{
 		switch (Mode)
 		{

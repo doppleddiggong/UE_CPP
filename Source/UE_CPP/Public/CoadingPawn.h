@@ -48,7 +48,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="발사 위치"))
 	USceneComponent* FirePos;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="생설될 총알 객체"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="생성될 총알 객체"))
 	TSubclassOf<AActor> BulletClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet", meta=(ToolTip="발사 효과음"))
