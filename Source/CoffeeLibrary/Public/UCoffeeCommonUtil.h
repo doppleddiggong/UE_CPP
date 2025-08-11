@@ -20,7 +20,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "In Bounds"))
 	static bool InBounds(const int32 Index, const int32 Count);
 
-	
+	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "GetNowTimestamp"))
+	static int64 GetNowTimestamp();
+
 	/**
 	 * @brief 액터에 부착된 특정 이름의 컴포넌트를 찾습니다.
 	 * @tparam T 찾고자 하는 컴포넌트의 타입 (예: USceneComponent, UStaticMeshComponent 등)

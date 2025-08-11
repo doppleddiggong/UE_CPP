@@ -2,7 +2,10 @@
 #include "CoadingPawn.h"
 #include "ULog.h"
 
+#include "CoffeeLibrary.h"
+
 #include "Kismet/GameplayStatics.h"
+#include "Misc/DateTime.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -26,6 +29,39 @@ ACoadingPawn::ACoadingPawn()
 void ACoadingPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//
+	// // 컬러값에서 r,g,b 뽑아내기
+	// int32 color = 0xffaaccee;
+	// int32 r = color >> 24; // 0xff
+	// int32 g = (color >> 16) & r; // 0xffaa
+	// int32 b = (color >> 8) & r;
+	// int32 a = (color >> 8);
+	//
+	// int32 color2 = 0;
+	// color2 = (r << 24) | (g << 16 ) | (b << 8 ) | a ;
+
+	
+	// ULOG( Warning, "%d, %d, %d",  r, g, b);
+		
+	// FDateTime DateTime(1986,11,8);
+	// ULOG( Warning, "%d",  DateTime.GetYear());
+	// ULOG( Warning, "%d",  DateTime.GetMonth());
+	// ULOG( Warning, "%d",  DateTime.GetDay());
+
+	
+	ULOG( Warning, "GetNowTimestamp :  %lld", UCoffeeCommonUtil::GetNowTimestamp() );
+
+
+	// int32 ymd = 19'861'108;
+	// int32 year = ymd/10'000;
+	// int32 month =(ymd -year*10000)/1'00;
+	// int32 day = (ymd -year*10000 - month*100);
+	// ULOG( Warning, "%d",  ymd);
+	// ULOG( Warning, "%d",  year);
+	// ULOG( Warning, "%d",  month);
+	// ULOG( Warning, "%d",  day);
+	
 
 	this->SetupInputMapping();
 /*
