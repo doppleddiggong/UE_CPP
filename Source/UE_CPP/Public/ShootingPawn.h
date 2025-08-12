@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
 #include "ShootingPawn.generated.h"
 
@@ -22,6 +23,25 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void UpdateMove(const float DeltaTime);
+	void OnInputMove(const FInputActionValue& Value);
+	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBoxComponent* BoxComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* MeshComp;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputAction* IA_Move;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputMappingContext* IMC_Player;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed;
+
+	float Horizontal;
+	float Vertical;
 };
