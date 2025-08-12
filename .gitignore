@@ -78,3 +78,4 @@ DerivedDataCache/*
 # Visual Studio user-specific files
 *.user
 *.DotSettings.user
+*.user
