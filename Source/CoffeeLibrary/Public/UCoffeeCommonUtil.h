@@ -12,21 +12,26 @@ class COFFEELIBRARY_API UCoffeeCommonUtil : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	static void TestULog();
+	static void TestInBound();
+
+	
 	/**
 	 * 인덱스가 유효한 범위 (0, Count) 내에 있는지 확인합니다.
 	 * @param Index 검사할 인덱스
 	 * @param Count 배열 또는 리스트의 총 길이 (상한값, 미포함)
 	 */
-	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "In Bounds"))
+	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "InBounds"))
 	static bool InBounds(const int32 Index, const int32 Count);
 
+	
 	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "NowTimestamp"))
 	static int64 GetNowTimestamp();	
 
-
-	static void TestULog();
-	static void TestInBound();
 	
+	UFUNCTION(BlueprintPure, Category = "CoffeeLibrary|Utilities", meta = (DisplayName = "GetFirstNumberInActorLabel"))
+	static int32 GetFirstNumberInActorLabel(const AActor* Actor);
+
 	/**
 	 * @brief 액터에 부착된 특정 이름의 컴포넌트를 찾습니다.
 	 * @tparam T 찾고자 하는 컴포넌트의 타입 (예: USceneComponent, UStaticMeshComponent 등)

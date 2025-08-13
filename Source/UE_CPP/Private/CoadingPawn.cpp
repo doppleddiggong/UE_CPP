@@ -14,9 +14,8 @@
 
 #include "Bullet.h"
 
-
 #define MAPPING_PATH	TEXT("/Game/CustomContents/Inputs/IMC_PlayerInput.IMC_PlayerInput")
-#define FIRE_PATH	TEXT("Scene_Fire")
+#define FIRE_PATH		TEXT("Scene_Fire")
 
 ACoadingPawn::ACoadingPawn()
 {

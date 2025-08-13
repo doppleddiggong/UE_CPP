@@ -3,17 +3,6 @@
 #include "UCoffeeCommonUtil.h"
 #include "Misc/DateTime.h"
 
-bool UCoffeeCommonUtil::InBounds(const int32 Index, const int32 Count)
-{
-	return (Index >= 0) && (Index < Count);
-}
-
-int64 UCoffeeCommonUtil::GetNowTimestamp()
-{
-	const auto DataTime = FDateTime::UtcNow();
-	return DataTime.ToUnixTimestamp();
-}
-
 void UCoffeeCommonUtil::TestULog()
 {
 	int32 Number = 100;
@@ -54,4 +43,27 @@ void UCoffeeCommonUtil::TestInBound()
 	const bool bIsIndex2InBounds = InBounds(TestIndex2, MyArrayCount);
 	UE_LOG(LogTemp, Warning, TEXT("Is index %d in bounds [0..%d)? -> %s"),
 		TestIndex2, MyArrayCount, bIsIndex2InBounds ? TEXT("True") : TEXT("False"));
+}
+
+
+
+bool UCoffeeCommonUtil::InBounds(const int32 Index, const int32 Count)
+{
+	return (Index >= 0) && (Index < Count);
+}
+
+int64 UCoffeeCommonUtil::GetNowTimestamp()
+{
+	const auto DataTime = FDateTime::UtcNow();
+	return DataTime.ToUnixTimestamp();
+}
+
+int32 UCoffeeCommonUtil::GetFirstNumberInActorLabel(const AActor* Actor)
+{
+	for (const auto& Char : Actor->GetActorLabel())
+	{
+		if (FChar::IsDigit(Char))
+			return Char - '0';
+	}
+	return 0;
 }
