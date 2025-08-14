@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class UE_CPP : ModuleRules
 {
@@ -11,6 +12,13 @@ public class UE_CPP : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "CoffeeLibrary" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		
+		PublicIncludePaths.AddRange(new string[] {
+			Path.Combine(ModuleDirectory, "Common", "Public"),
+			Path.Combine(ModuleDirectory, "Shooting", "Public"),
+			Path.Combine(ModuleDirectory, "Math", "Public"),
+		});
+
 		
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

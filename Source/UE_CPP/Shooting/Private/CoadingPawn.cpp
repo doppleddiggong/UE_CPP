@@ -1,8 +1,7 @@
 
 #include "CoadingPawn.h"
 #include "ULog.h"
-
-#include "CoffeeLibrary.h"
+#include "FComponentHelper.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Misc/DateTime.h"
@@ -31,10 +30,7 @@ void ACoadingPawn::BeginPlay()
 	Super::BeginPlay();
 
 	this->SetupInputMapping();
-	FirePos = UCoffeeCommonUtil::FindComponentByNameRecursive<USceneComponent>(this, FIRE_PATH);
-
-	UCoffeeCommonUtil::TestInBound();
-	UCoffeeCommonUtil::TestULog();
+	FirePos = FComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, FIRE_PATH);
 }
 
 void ACoadingPawn::Tick(float DeltaTime)

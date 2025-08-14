@@ -1,9 +1,15 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "ShootingPawn.h"
+#include "UObjectPoolManager.h"
+#include "ShootingBullet.h"
+#include "ShootingEnemy.h"
+
 #include "Components/BoxComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/ArrowComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AShootingPawn::AShootingPawn()
 { 
@@ -15,6 +21,9 @@ AShootingPawn::AShootingPawn()
 	
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
+
+	FirePoint = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePointComp"));
+	FirePoint->SetupAttachment(MeshComp);
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02"));
 	if ( TempMesh.Succeeded())
@@ -29,6 +38,8 @@ void AShootingPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	this->ShotCount = 0;
+	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer() );
 	if ( SubSystem != nullptr )
@@ -52,6 +63,15 @@ void AShootingPawn::UpdateMove(const float DeltaTime)
 	this->SetActorLocation( P0 + Velocity * DeltaTime );
 
 	Horizontal = Vertical = 0;
+
+	if ( bAutoFire )
+	{
+		FireRate -= DeltaTime;
+		if ( FireRate < 0)
+		{
+			Fire();
+		}
+	}
 }
 
 void AShootingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -60,6 +80,20 @@ void AShootingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	UEnhancedInputComponent* IC = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	IC->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AShootingPawn::OnInputMove);
+	IC->BindAction(IA_Fire, ETriggerEvent::Started, this, &AShootingPawn::OnInputFirePress);
+	IC->BindAction(IA_Fire, ETriggerEvent::Completed, this, &AShootingPawn::OnInputFireRelease);
+}
+
+void AShootingPawn::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
+	if ( IsValid(Enemy))
+	{
+		Enemy->Destroy();
+		this->Destroy();
+	}	
 }
 
 void AShootingPawn::OnInputMove(const FInputActionValue& Value)
@@ -67,4 +101,37 @@ void AShootingPawn::OnInputMove(const FInputActionValue& Value)
 	auto V = Value.Get<FVector2D>();
 	this->Vertical = V.X;
 	this->Horizontal = V.Y;
+}
+
+void AShootingPawn::OnInputFirePress(const FInputActionValue& Value)
+{
+	bAutoFire = true;
+
+	Fire();
+}
+
+void AShootingPawn::OnInputFireRelease(const FInputActionValue& Value)
+{
+	bAutoFire = false;
+}
+
+void AShootingPawn::Fire()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Fire") );
+	FireRate = FireDelay;
+	ShotCount++;
+
+	AActor* Actor = UObjectPoolManager::Get()->GetPoolItem( GetWorld(), BulletClass[ ShotCount % BulletClass.Num()]  );
+	
+	AShootingBullet* ShootingBullet = Cast<AShootingBullet>(Actor);
+	ShootingBullet->SetOwner(this);
+	ShootingBullet->SetInstigator( GetInstigator() );
+	
+	if ( ShootingBullet )
+	{
+		ShootingBullet->SetActorLocation( FirePoint->GetComponentLocation() );
+		ShootingBullet->SetActorRotation( FirePoint->GetComponentRotation() );
+
+		UGameplayStatics::PlaySound2D(GetWorld(), FireSound);
+	}
 }

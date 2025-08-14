@@ -1,8 +1,9 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "GridPaper.h"
-#include "CoffeeLibrary.h"
+
 #include "ULog.h"
+#include "FComponentHelper.h"
 
 #include "Components/ArrowComponent.h"
 
@@ -17,8 +18,8 @@ AGridPaper::AGridPaper()
 void AGridPaper::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	PointComponent = UCoffeeCommonUtil::FindComponentByNameRecursive<USceneComponent>(this, POINT_PATH);
-	ArrowComponent = UCoffeeCommonUtil::FindComponentByNameRecursive<UArrowComponent>(this, POINT_ARROW_PATH);
+	PointComponent = FComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, POINT_PATH);
+	ArrowComponent = FComponentHelper::FindComponentByNameRecursive<UArrowComponent>(this, POINT_ARROW_PATH);
 }
 
 void AGridPaper::BeginPlay()

@@ -16,6 +16,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	
+	void EndPlay(EEndPlayReason::Type EndPlayReason);
+	void ReturnToPool();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -28,4 +32,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float MoveSpeed = 100.0f;
+
+
+private:
+	FTimerHandle TimerHandle_AutoReturn;
 };

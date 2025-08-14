@@ -3,17 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputActionValue.h"
-#include "GameFramework/Pawn.h"
-#include "ShootingPawn.generated.h"
+#include "GameFramework/Actor.h"
+#include "ShootingEnemy.generated.h"
 
 UCLASS()
-class UE_CPP_API AShootingPawn : public APawn
+class UE_CPP_API AShootingEnemy : public AActor
 {
 	GENERATED_BODY()
-
-public:
-	AShootingPawn();
+	
+public:	
+	AShootingEnemy();
 
 protected:
 	virtual void BeginPlay() override;
@@ -21,27 +20,25 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	void UpdateMove(const float DeltaTime);
-	void OnInputMove(const FInputActionValue& Value);
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
+private:
+	void UpdateMove(const float DeltaTime);
+	
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* BoxComp;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* MeshComp;
-
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UInputAction* IA_Move;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UInputMappingContext* IMC_Player;
+	class UArrowComponent* FirePoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveSpeed;
+	float MoveSpeed = 100.0f;
 
-	float Horizontal;
-	float Vertical;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FireRate = 0;
+	float FireDelay = 1.5f;
+	bool bAutoFire  = false;
 };
