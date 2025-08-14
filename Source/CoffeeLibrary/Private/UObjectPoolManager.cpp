@@ -1,66 +1,55 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
-
 #include "UObjectPoolManager.h"
+#include "Engine/World.h"
 
-#if WITH_EDITOR
-#include "Editor.h"
-#endif
 
-UObjectPoolManager* UObjectPoolManager::Instance = nullptr;
-
-UObjectPoolManager::UObjectPoolManager()
+void UObjectPoolManager::Initialize(FSubsystemCollectionBase& Collection)
 {
-#if WITH_EDITOR
-	FEditorDelegates::EndPIE.AddLambda([](const bool bIsSimulating)
-	{
-		Instance = nullptr;
-	});
-#endif
+	Super::Initialize(Collection);
+
+	// 초기화 로직 (예: 로그 출력)
+	UE_LOG(LogTemp, Log, TEXT("ObjectPoolManager Initialized."));
 }
 
-UObjectPoolManager* UObjectPoolManager::Get()
+void UObjectPoolManager::Deinitialize()
 {
-	if ( !IsValid(Instance))
+	for (auto& Elem : PoolMap)
 	{
-		Instance = NewObject<UObjectPoolManager>();
-		Instance->AddToRoot();
+		for (AActor* Actor : Elem.Value)
+		{
+			if (IsValid(Actor))
+			{
+				Actor->Destroy();
+			}
+		}
 	}
-	return Instance;
+	PoolMap.Empty();
+    
+	Super::Deinitialize();
 }
 
-AActor* UObjectPoolManager::GetPoolItem(UWorld* World, const TSubclassOf<AActor> InClass )
+AActor* UObjectPoolManager::GetPoolItem(const UObject* WorldContextObject, const TSubclassOf<AActor> InClass )
 {
-	if (!IsValid(World))
-	{
-		UE_LOG(LogTemp, Error, TEXT("GetPoolItem failed: World is invalid."));
-		return nullptr;
-	}
-
 	if (!InClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT("GetPoolItem failed: InClass is null."));
 		return nullptr;
 	}
 	
-	TArray<AActor*>& Pool = PoolMap.FindOrAdd(InClass);
-
-	for (AActor* Actor : Pool)
+	TArray<AActor*>* Pool = PoolMap.Find(InClass);
+	if (Pool && Pool->Num() > 0)
 	{
-		if ( Actor != nullptr && Actor->IsActorTickEnabled() == false)
-		{
-			Actor->SetActorHiddenInGame(false);
-			Actor->SetActorEnableCollision(true);
-			Actor->SetActorTickEnabled(true);
-			return Actor;
-		}
+		AActor* Actor = Pool->Pop();
+		Actor->SetActorHiddenInGame(false);
+		Actor->SetActorEnableCollision(true);
+		Actor->SetActorTickEnabled(true);
+		return Actor;
 	}
 
-	AActor* NewActor = World->SpawnActor<AActor>(InClass, FVector::ZeroVector, FRotator::ZeroRotator);
-	if ( NewActor != nullptr )
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
-		Pool.Add(NewActor);
-		return NewActor;
+		return World->SpawnActor<AActor>(InClass, FVector::ZeroVector, FRotator::ZeroRotator);
 	}
 
 	return nullptr;
@@ -74,4 +63,8 @@ void UObjectPoolManager::ReturnActorToPool(AActor* Actor)
 	Actor->SetActorHiddenInGame(true);
 	Actor->SetActorEnableCollision(false);
 	Actor->SetActorTickEnabled(false);
+
+	TSubclassOf<AActor> ActorClass = Actor->GetClass();
+	TArray<AActor*>& Pool = PoolMap.FindOrAdd(ActorClass);
+	Pool.Add(Actor);
 }

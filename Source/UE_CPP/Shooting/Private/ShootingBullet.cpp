@@ -2,9 +2,9 @@
 
 
 #include "ShootingBullet.h"
-
 #include "ShootingEnemy.h"
 #include "UObjectPoolManager.h"
+#include "UGameEventManager.h"
 
 #include "Components/BoxComponent.h"
 
@@ -25,7 +25,6 @@ void AShootingBullet::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 2초 후에 반환
 	GetWorldTimerManager().SetTimer(
 		TimerHandle_AutoReturn,
 		this,
@@ -42,6 +41,8 @@ void AShootingBullet::NotifyActorBeginOverlap(AActor* OtherActor)
 	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
 	if ( IsValid(Enemy))
 	{
+		UGameEventManager::Get(this)->OnScore.Broadcast(1);
+		
 		Enemy->Destroy();
 		// this->Destroy();
 		ReturnToPool();
@@ -56,7 +57,9 @@ void AShootingBullet::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AShootingBullet::ReturnToPool()
 {
-	UObjectPoolManager::Get()->ReturnActorToPool(this);
+	UObjectPoolManager* PoolManager = GetGameInstance()->GetSubsystem<UObjectPoolManager>();
+	if (PoolManager != nullptr )
+		PoolManager->ReturnActorToPool(this);
 }
 
 void AShootingBullet::Tick(float DeltaTime)

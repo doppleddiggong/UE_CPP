@@ -3,29 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "UObjectPoolManager.generated.h"
 
 UCLASS()
-class COFFEELIBRARY_API UObjectPoolManager : public UObject
+class COFFEELIBRARY_API UObjectPoolManager : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
 
 public:	
-    UObjectPoolManager();
-
-private:	
-    static UObjectPoolManager* Instance;
+    virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+    virtual void Deinitialize() override;
     
-    TMap<UClass*, TArray<AActor*>> PoolMap;
-
-public:
-    UFUNCTION(BlueprintCallable, Category="Pool")
-    static UObjectPoolManager* Get();
-
-    UFUNCTION(BlueprintCallable, Category="Pool")
-    AActor* GetPoolItem(UWorld* World, const TSubclassOf<AActor> InClass );
-
+    UFUNCTION(BlueprintCallable, Category="Pool", meta = (WorldContext = "WorldContextObject"))
+    AActor* GetPoolItem(const UObject* WorldContextObject, TSubclassOf<AActor> InClass);
+    
     UFUNCTION(BlueprintCallable, Category="Pool")
     void ReturnActorToPool(AActor* Actor);
+
+private:	
+    TMap<UClass*, TArray<AActor*>> PoolMap;
 };

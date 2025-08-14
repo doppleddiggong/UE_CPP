@@ -2,6 +2,7 @@
 
 #include "ShootingPawn.h"
 #include "UObjectPoolManager.h"
+#include "UGameEventManager.h"
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
 
@@ -39,11 +40,18 @@ void AShootingPawn::BeginPlay()
 	Super::BeginPlay();
 
 	this->ShotCount = 0;
+	this-> Score = 0;
 	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer() );
 	if ( SubSystem != nullptr )
 		SubSystem->AddMappingContext(IMC_Player,0);
+
+
+	UGameEventManager::Get(this)->OnScore.AddLambda([&](int InScore) {
+		this->Score += InScore;
+		UE_LOG(LogTemp, Log, TEXT("Game Score: %d"), this->Score);
+	});
 }
 
 void AShootingPawn::Tick(float DeltaTime)
@@ -121,16 +129,22 @@ void AShootingPawn::Fire()
 	FireRate = FireDelay;
 	ShotCount++;
 
-	AActor* Actor = UObjectPoolManager::Get()->GetPoolItem( GetWorld(), BulletClass[ ShotCount % BulletClass.Num()]  );
-	
-	AShootingBullet* ShootingBullet = Cast<AShootingBullet>(Actor);
-	ShootingBullet->SetOwner(this);
-	ShootingBullet->SetInstigator( GetInstigator() );
-	
-	if ( ShootingBullet )
+	UObjectPoolManager* PoolManager = GetGameInstance()->GetSubsystem<UObjectPoolManager>();
+	if (!PoolManager)
 	{
-		ShootingBullet->SetActorLocation( FirePoint->GetComponentLocation() );
-		ShootingBullet->SetActorRotation( FirePoint->GetComponentRotation() );
+		UE_LOG(LogTemp, Error, TEXT("AShootingPawn::Fire() failed: UObjectPoolManager subsystem not found."));
+		return;
+	}
+
+	// 풀에서 아이템을 가져옵니다.
+	TSubclassOf<AActor> BulletToSpawn = BulletClass[ShotCount % BulletClass.Num()];
+	AActor* Actor = PoolManager->GetPoolItem(this, BulletToSpawn);
+	
+	if (AShootingBullet* ShootingBullet = Cast<AShootingBullet>(Actor))
+	{
+		ShootingBullet->SetOwner(this);
+		ShootingBullet->SetInstigator( GetInstigator() );
+		ShootingBullet->SetActorLocationAndRotation(FirePoint->GetComponentLocation(), FirePoint->GetComponentRotation());
 
 		UGameplayStatics::PlaySound2D(GetWorld(), FireSound);
 	}

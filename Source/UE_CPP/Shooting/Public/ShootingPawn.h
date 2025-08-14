@@ -20,18 +20,16 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
-	
+private:
 	void UpdateMove(const float DeltaTime);
-	void OnInputMove(const FInputActionValue& Value);
 
+	void OnInputMove(const FInputActionValue& Value);
 	void OnInputFirePress(const FInputActionValue& Value);
 	void OnInputFireRelease(const FInputActionValue& Value);
-	
+
 	void Fire();
 	
 public:
@@ -60,10 +58,10 @@ public:
 	float Vertical;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FireRate = 0;
+	float FireRate = 1.5f;
 	float FireDelay = 1.5f;
 	bool bAutoFire  = false;
 
-
-	int ShotCount = 0;
+	int32 ShotCount = 0;
+	int32 Score = 0;
 };
