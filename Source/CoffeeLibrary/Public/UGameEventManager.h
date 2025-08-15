@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "CoffeeMacro.h"
 #include "UGameEventManager.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnScore, int);
 
 UCLASS()
 class COFFEELIBRARY_API UGameEventManager : public UGameInstanceSubsystem
@@ -11,15 +11,12 @@ class COFFEELIBRARY_API UGameEventManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	static UGameEventManager* Get(UObject* WorldContext)
-	{
-		if (!WorldContext)
-			return nullptr;
-		
-		if (auto* GI = WorldContext->GetWorld()->GetGameInstance())
-			return GI->GetSubsystem<UGameEventManager>();
-		return nullptr;
-	}
-	
+	DEFINE_SUBSYSTEM_GETTER_INLINE(UGameEventManager);
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnScore, int);
 	FOnScore OnScore;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKill, int, Kill);
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnKill OnKill;
 };

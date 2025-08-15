@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoffeeMacro.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "UObjectPoolManager.generated.h"
 
@@ -14,6 +15,8 @@ class COFFEELIBRARY_API UObjectPoolManager : public UGameInstanceSubsystem
 public:	
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
+
+    DEFINE_SUBSYSTEM_GETTER_INLINE(UObjectPoolManager);
     
     UFUNCTION(BlueprintCallable, Category="Pool", meta = (WorldContext = "WorldContextObject"))
     AActor* GetPoolItem(const UObject* WorldContextObject, TSubclassOf<AActor> InClass);
