@@ -8,7 +8,6 @@ void UObjectPoolManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	// 초기화 로직 (예: 로그 출력)
 	UE_LOG(LogTemp, Log, TEXT("ObjectPoolManager Initialized."));
 }
 
