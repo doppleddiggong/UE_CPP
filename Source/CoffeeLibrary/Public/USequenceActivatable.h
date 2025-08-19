@@ -17,10 +17,9 @@ class COFFEELIBRARY_API ISequenceActivatable
 	GENERATED_BODY()
 
 public:
-	/** Duration 동안 연출 수행 (구현체에서 Timeline.PlayRate = Len/Duration 등) */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Sequence")
-	void Activate(float Duration);
+	void Activate(int Index, int TotalIndex, float Duration);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Sequence")
-	void Deactivate();
+	void Deactivate(int Index, int TotalIndex, float Duration);
 };
