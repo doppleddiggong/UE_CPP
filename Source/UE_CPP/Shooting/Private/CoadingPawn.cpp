@@ -1,7 +1,7 @@
 
 #include "CoadingPawn.h"
 #include "ULog.h"
-#include "ComponentHelper.h"
+#include "FComponentHelper.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Misc/DateTime.h"
@@ -30,7 +30,7 @@ void ACoadingPawn::BeginPlay()
 	Super::BeginPlay();
 
 	this->SetupInputMapping();
-	FirePos = ComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, FIRE_PATH);
+	FirePos = FComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, FIRE_PATH);
 }
 
 void ACoadingPawn::Tick(float DeltaTime)
@@ -124,6 +124,8 @@ void ACoadingPawn::OnFireAction(const FInputActionValue& Value)
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Orange, "FirePos is nullptr");
 		return;
 	}
+	
+	ULOG( Warning, "OnFireAction");
 	
 	UWorld* World = GetWorld();
 	auto SpawnLocation = FirePos->GetComponentLocation();

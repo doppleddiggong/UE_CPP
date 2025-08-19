@@ -2,9 +2,14 @@
 
 
 #include "ShootingEnemy.h"
-
+#include "UObjectPoolManager.h"
 #include "ShootingPawn.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+#define PLAYER_CHANNEL	ECollisionChannel::ECC_GameTraceChannel1
+#define ENEMY_CHANNEL	ECollisionChannel::ECC_GameTraceChannel2
+#define BULLET_CHANNEL	ECollisionChannel::ECC_GameTraceChannel3
 
 // Sets default values
 AShootingEnemy::AShootingEnemy()
@@ -25,11 +30,32 @@ AShootingEnemy::AShootingEnemy()
 	ConstructorHelpers::FObjectFinder<UMaterial> TempMaterial(TEXT("/Game/StarterContent/Materials/M_Wood_Pine.M_Wood_Pine"));
 	if ( TempMaterial.Succeeded() )
 		MeshComp->SetMaterial (0, TempMaterial.Object );
+
+
+	MeshComp->SetGenerateOverlapEvents(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+	BoxComp->SetGenerateOverlapEvents(true);
+	BoxComp->SetCollisionProfileName(TEXT("Enemy"));
 }
 
 void AShootingEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MoveDirection = FVector(0, 0, -1.0f);
+	int32 rand = FMath::RandRange(0,9 );
+	if( rand < 3 )
+	{
+		auto Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if ( Player != nullptr )
+		{
+			MoveDirection = Player->GetActorLocation() - this->GetActorLocation();
+			MoveDirection.Normalize();
+		}
+	}
+	
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AShootingEnemy::OnBoxCompBeginOverlap);
 }
 
 void AShootingEnemy::Tick(float DeltaTime)
@@ -38,15 +64,20 @@ void AShootingEnemy::Tick(float DeltaTime)
 	this->UpdateMove(DeltaTime);
 }
 
-void AShootingEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
+void AShootingEnemy::OnBoxCompBeginOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
 {
-	Super::NotifyActorBeginOverlap(OtherActor);
-
 	auto* Player = Cast<AShootingPawn>(OtherActor);
+
 	if ( IsValid(Player))
 	{
 		Player->Destroy();
-		this->Destroy();
+		ReturnToPool();
 	}
 }
 
@@ -54,11 +85,16 @@ void AShootingEnemy::UpdateMove(const float DeltaTime)
 {
 	// P = P0 + vt;
 	FVector P0 = GetActorLocation();
-	FVector Direction = FVector(0, 0, -1.0f);
-	Direction.Normalize();
-	FVector Velocity = Direction * MoveSpeed;
+	// FVector Direction = FVector(0, 0, -1.0f);
+	// Direction.Normalize();
+	FVector Velocity = MoveDirection * MoveSpeed;
 
 	this->SetActorLocation( P0 + Velocity * DeltaTime );
 }
 
-
+void AShootingEnemy::ReturnToPool()
+{
+	UObjectPoolManager* PoolManager = GetGameInstance()->GetSubsystem<UObjectPoolManager>();
+	if (PoolManager != nullptr )
+		PoolManager->ReturnActorToPool(this);
+}

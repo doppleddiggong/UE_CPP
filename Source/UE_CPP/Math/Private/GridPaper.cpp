@@ -3,7 +3,7 @@
 #include "GridPaper.h"
 
 #include "ULog.h"
-#include "ComponentHelper.h"
+#include "FComponentHelper.h"
 
 #include "Components/ArrowComponent.h"
 
@@ -18,8 +18,8 @@ AGridPaper::AGridPaper()
 void AGridPaper::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	PointComponent = ComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, POINT_PATH);
-	ArrowComponent = ComponentHelper::FindComponentByNameRecursive<UArrowComponent>(this, POINT_ARROW_PATH);
+	PointComponent = FComponentHelper::FindComponentByNameRecursive<USceneComponent>(this, POINT_PATH);
+	ArrowComponent = FComponentHelper::FindComponentByNameRecursive<UArrowComponent>(this, POINT_ARROW_PATH);
 }
 
 void AGridPaper::BeginPlay()

@@ -3,10 +3,12 @@
 
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
+#include "ULog.h"
 #include "UObjectPoolManager.h"
 #include "UGameEventManager.h"
 
 #include "Components/BoxComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AShootingBullet::AShootingBullet()
 {
@@ -19,6 +21,18 @@ AShootingBullet::AShootingBullet()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(BoxComp);
 	MeshComp->SetWorldScale3D(FVector(0.75f));
+
+	MeshComp->SetGenerateOverlapEvents(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+	BoxComp->SetGenerateOverlapEvents(true);
+	BoxComp->SetCollisionProfileName(TEXT("Bullet"));
+}
+
+void AShootingBullet::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	this->ReturnToPool();
 }
 
 void AShootingBullet::BeginPlay()
@@ -32,31 +46,18 @@ void AShootingBullet::BeginPlay()
 		2.0f,      // 2초
 		false      // 반복 없음
 	);
-}
 
-void AShootingBullet::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
-	if ( IsValid(Enemy))
-	{
-		UGameEventManager::Get(this)->OnScore.Broadcast(1);
-		
-		Enemy->Destroy();
-		// this->Destroy();
-		ReturnToPool();
-	}
-}
-
-void AShootingBullet::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	this->ReturnToPool();
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AShootingBullet::OnBoxCompBeginOverlap );
 }
 
 void AShootingBullet::ReturnToPool()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ReturnToPool") );
+
+	
+	if (GetWorldTimerManager().IsTimerActive(TimerHandle_AutoReturn))
+		GetWorldTimerManager().ClearTimer(TimerHandle_AutoReturn);
+	
 	UObjectPoolManager* PoolManager = GetGameInstance()->GetSubsystem<UObjectPoolManager>();
 	if (PoolManager != nullptr )
 		PoolManager->ReturnActorToPool(this);
@@ -70,3 +71,17 @@ void AShootingBullet::Tick(float DeltaTime)
 	AddActorWorldOffset(Direction * MoveSpeed * DeltaTime);
 }
 
+void AShootingBullet::OnBoxCompBeginOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
+	if ( IsValid(Enemy))
+		Enemy->ReturnToPool();
+
+	this->ReturnToPool();
+}

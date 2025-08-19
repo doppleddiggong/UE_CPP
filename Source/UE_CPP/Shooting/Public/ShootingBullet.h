@@ -16,9 +16,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION()
+	void OnBoxCompBeginOverlap( UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,bool bFromSweep, const FHitResult& SweepResult);
 	
-	void EndPlay(EEndPlayReason::Type EndPlayReason);
 	void ReturnToPool();
 
 public:	

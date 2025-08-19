@@ -20,11 +20,22 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-	
+	// virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	UFUNCTION()
+	void OnBoxCompBeginOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+
+	void ReturnToPool();
+
 private:
 	void UpdateMove(const float DeltaTime);
-	
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -41,4 +52,7 @@ public:
 	float FireRate = 0;
 	float FireDelay = 1.5f;
 	bool bAutoFire  = false;
+
+
+	FVector MoveDirection;
 };

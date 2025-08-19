@@ -33,6 +33,13 @@ AShootingPawn::AShootingPawn()
 	ConstructorHelpers::FObjectFinder<UMaterial> TempMaterial(TEXT("/Game/StarterContent/Materials/M_Tech_Hex_Tile_Pulse.M_Tech_Hex_Tile_Pulse"));
 	if ( TempMaterial.Succeeded() )
 		MeshComp->SetMaterial (0, TempMaterial.Object );
+
+
+	MeshComp->SetGenerateOverlapEvents(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+	BoxComp->SetGenerateOverlapEvents(true);
+	BoxComp->SetCollisionProfileName(TEXT("Player"));
 }
 
 void AShootingPawn::BeginPlay()
@@ -47,11 +54,12 @@ void AShootingPawn::BeginPlay()
 	if ( SubSystem != nullptr )
 		SubSystem->AddMappingContext(IMC_Player,0);
 
-
 	UGameEventManager::Get(this)->OnScore.AddLambda([&](int InScore) {
 		this->Score += InScore;
 		UE_LOG(LogTemp, Log, TEXT("Game Score: %d"), this->Score);
 	});
+
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AShootingPawn::OnBoxCompBeginOverlap );
 }
 
 void AShootingPawn::Tick(float DeltaTime)
@@ -92,18 +100,6 @@ void AShootingPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	IC->BindAction(IA_Fire, ETriggerEvent::Completed, this, &AShootingPawn::OnInputFireRelease);
 }
 
-void AShootingPawn::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
-	if ( IsValid(Enemy))
-	{
-		Enemy->Destroy();
-		this->Destroy();
-	}	
-}
-
 void AShootingPawn::OnInputMove(const FInputActionValue& Value)
 {
 	auto V = Value.Get<FVector2D>();
@@ -138,14 +134,35 @@ void AShootingPawn::Fire()
 
 	// 풀에서 아이템을 가져옵니다.
 	TSubclassOf<AActor> BulletToSpawn = BulletClass[ShotCount % BulletClass.Num()];
-	AActor* Actor = PoolManager->GetPoolItem(this, BulletToSpawn);
+	AActor* Actor = PoolManager->GetPoolItemLocationRotator(this, BulletToSpawn,
+		FirePoint->GetComponentLocation(), FirePoint->GetComponentRotation() );
 	
 	if (AShootingBullet* ShootingBullet = Cast<AShootingBullet>(Actor))
 	{
 		ShootingBullet->SetOwner(this);
 		ShootingBullet->SetInstigator( GetInstigator() );
-		ShootingBullet->SetActorLocationAndRotation(FirePoint->GetComponentLocation(), FirePoint->GetComponentRotation());
 
 		UGameplayStatics::PlaySound2D(GetWorld(), FireSound);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AShootingBullet Cast Fail") );
+	}
+}
+
+void AShootingPawn::OnBoxCompBeginOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
+
+	if ( IsValid(Enemy))
+	{
+		Enemy->ReturnToPool();
+		this->Destroy();
 	}
 }
