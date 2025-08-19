@@ -8,6 +8,13 @@
 struct FComponentHelper
 {
 	template<typename T>
+	static T* LoadAsset(const TCHAR* Path)
+	{
+		ConstructorHelpers::FObjectFinder<T> Obj(Path);
+		return Obj.Succeeded() ? Obj.Object.Get() : nullptr;
+	}
+	
+	template<typename T>
 	static T* FindComponentByName(AActor* Owner, const FName& ComponentName)
 	{
 		if (!IsValid((Owner)))

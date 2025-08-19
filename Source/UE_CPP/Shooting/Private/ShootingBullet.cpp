@@ -3,12 +3,15 @@
 
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
-#include "ULog.h"
 #include "UObjectPoolManager.h"
-#include "UGameEventManager.h"
+#include "FComponentHelper.h"
 
 #include "Components/BoxComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+
+#define EXPLOSION_VFX		TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion")
+#define EXPLOSION_SOUND		TEXT("/Game/Shooting/Sounds/Explosion.Explosion")
 
 AShootingBullet::AShootingBullet()
 {
@@ -27,6 +30,9 @@ AShootingBullet::AShootingBullet()
 
 	BoxComp->SetGenerateOverlapEvents(true);
 	BoxComp->SetCollisionProfileName(TEXT("Bullet"));
+
+	ExplosionVFX = FComponentHelper::LoadAsset<UParticleSystem>(EXPLOSION_VFX);
+	ExplosionSound = FComponentHelper::LoadAsset<USoundBase>(EXPLOSION_SOUND);
 }
 
 void AShootingBullet::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -54,7 +60,6 @@ void AShootingBullet::ReturnToPool()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ReturnToPool") );
 
-	
 	if (GetWorldTimerManager().IsTimerActive(TimerHandle_AutoReturn))
 		GetWorldTimerManager().ClearTimer(TimerHandle_AutoReturn);
 	
@@ -81,7 +86,11 @@ void AShootingBullet::OnBoxCompBeginOverlap(
 {
 	auto* Enemy = Cast<AShootingEnemy>(OtherActor);
 	if ( IsValid(Enemy))
-		Enemy->ReturnToPool();
+	{
+		UGameplayStatics::SpawnEmitterAtLocation( GetWorld(), ExplosionVFX, GetActorLocation() );
+		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 
-	this->ReturnToPool();
+		Enemy->ReturnToPool();
+		this->ReturnToPool();
+	}
 }

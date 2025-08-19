@@ -5,12 +5,21 @@
 #include "UGameEventManager.h"
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
+#include "FComponentHelper.h"
 
-#include "Components/BoxComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+
+#include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
+
+#define MESH_STATIC_MESH		TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02")
+#define MESH_MATERIAL			TEXT("/Game/StarterContent/Materials/M_Tech_Hex_Tile_Pulse.M_Tech_Hex_Tile_Pulse")
+
+#define EXPLOSION_VFX			TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion")
+#define EXPLOSION_SOUND			TEXT("/Game/Shooting/Sounds/Explosion.Explosion")
 
 AShootingPawn::AShootingPawn()
 { 
@@ -26,20 +35,16 @@ AShootingPawn::AShootingPawn()
 	FirePoint = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePointComp"));
 	FirePoint->SetupAttachment(MeshComp);
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02"));
-	if ( TempMesh.Succeeded())
-		MeshComp->SetStaticMesh( TempMesh.Object );
-
-	ConstructorHelpers::FObjectFinder<UMaterial> TempMaterial(TEXT("/Game/StarterContent/Materials/M_Tech_Hex_Tile_Pulse.M_Tech_Hex_Tile_Pulse"));
-	if ( TempMaterial.Succeeded() )
-		MeshComp->SetMaterial (0, TempMaterial.Object );
-
-
+	MeshComp->SetStaticMesh( FComponentHelper::LoadAsset<UStaticMesh>(MESH_STATIC_MESH));
+	MeshComp->SetMaterial(0, FComponentHelper::LoadAsset<UMaterial>(MESH_MATERIAL));
 	MeshComp->SetGenerateOverlapEvents(false);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
 	BoxComp->SetGenerateOverlapEvents(true);
 	BoxComp->SetCollisionProfileName(TEXT("Player"));
+
+	ExplosionVFX = FComponentHelper::LoadAsset<UParticleSystem>(EXPLOSION_VFX);
+	ExplosionSound = FComponentHelper::LoadAsset<USoundBase>(EXPLOSION_SOUND);
 }
 
 void AShootingPawn::BeginPlay()
@@ -162,6 +167,9 @@ void AShootingPawn::OnBoxCompBeginOverlap(
 
 	if ( IsValid(Enemy))
 	{
+		UGameplayStatics::SpawnEmitterAtLocation( GetWorld(), ExplosionVFX, GetActorLocation() );
+		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
+		
 		Enemy->ReturnToPool();
 		this->Destroy();
 	}

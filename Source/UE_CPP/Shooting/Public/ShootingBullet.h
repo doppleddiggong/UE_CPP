@@ -32,6 +32,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite )
 	TObjectPtr<class UStaticMeshComponent> MeshComp;
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ExplosionVFX;
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* ExplosionSound; 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	float MoveSpeed = 100.0f;

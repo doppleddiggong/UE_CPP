@@ -4,8 +4,12 @@
 #include "ShootingEnemy.h"
 #include "UObjectPoolManager.h"
 #include "ShootingPawn.h"
+#include "FComponentHelper.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+
+#define MESH_STATIC_MESH		TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02")
+#define MESH_MATERIAL			TEXT("/Game/StarterContent/Materials/M_Wood_Pine.M_Wood_Pine")
 
 #define PLAYER_CHANNEL	ECollisionChannel::ECC_GameTraceChannel1
 #define ENEMY_CHANNEL	ECollisionChannel::ECC_GameTraceChannel2
@@ -22,16 +26,10 @@ AShootingEnemy::AShootingEnemy()
 	
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
-
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TempMesh(TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02"));
-	if ( TempMesh.Succeeded())
-		MeshComp->SetStaticMesh( TempMesh.Object );
-
-	ConstructorHelpers::FObjectFinder<UMaterial> TempMaterial(TEXT("/Game/StarterContent/Materials/M_Wood_Pine.M_Wood_Pine"));
-	if ( TempMaterial.Succeeded() )
-		MeshComp->SetMaterial (0, TempMaterial.Object );
-
-
+	
+	MeshComp->SetStaticMesh( FComponentHelper::LoadAsset<UStaticMesh>(MESH_STATIC_MESH));
+	MeshComp->SetMaterial(0, FComponentHelper::LoadAsset<UMaterial>(MESH_MATERIAL));
+	
 	MeshComp->SetGenerateOverlapEvents(false);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 

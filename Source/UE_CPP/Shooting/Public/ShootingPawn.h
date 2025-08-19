@@ -45,16 +45,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<AActor>> BulletClass;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ExplosionVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USoundBase* FireSound;
-	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* ExplosionSound; 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputAction* IA_Move;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputAction* IA_Fire;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputMappingContext* IMC_Player;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 	float Horizontal;
