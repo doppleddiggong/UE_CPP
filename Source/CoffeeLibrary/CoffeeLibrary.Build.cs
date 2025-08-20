@@ -10,20 +10,27 @@ public class CoffeeLibrary : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", 
+			"Core", 
+			"CoreUObject", 
 			"Engine", 
+		});
+	
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
 			"InputCore", 
 			"EnhancedInput",
-			"UMG", "Slate", "SlateCore", "UnrealEd", "EditorSubsystem", "ApplicationCore"
+			"UMG", 
+			"Slate", 
+			"SlateCore", 
+			"ApplicationCore"
 		});
-
-		PrivateDependencyModuleNames.AddRange(new string[] { });
 		
 		if (Target.bBuildEditor)
 		{
 			PrivateDependencyModuleNames.AddRange(new string[]
 			{
-				"UnrealEd"
+				"UnrealEd", 
+				"EditorSubsystem"
 			});
 		}
 		

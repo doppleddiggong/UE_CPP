@@ -18,4 +18,28 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="EUW|List", meta=(DisplayName="Move Actor (In-Place)"))
 	static bool MoveActor(UPARAM(ref) TArray<AActor*>& Array, AActor* Target, int32 Delta, int32& OutNewIndex);
+
+	UFUNCTION(BlueprintCallable, Category="EUW|Arrange")
+	static void ArrangeActorsLinear(
+		UPARAM(ref) TArray<AActor*>& Actors,
+		FVector StepOffset,
+		bool bKeepZ = false);
+
+	UFUNCTION(BlueprintCallable, Category="EUW|Arrange")
+	static void ArrangeAndRename(
+		UPARAM(ref) TArray<AActor*>& Actors,
+		FVector StepOffset,
+		const FString& Prefix,
+		int32 StartIndex = 1,
+		int32 ZeroPad = 2,
+		bool bKeepZ = false);
+
+	UFUNCTION(BlueprintCallable, Category="EUW|Arrange")
+	static void ArrangeByFirstForward(
+		UPARAM(ref) TArray<AActor*>& Actors,
+		float Spacing,
+		bool bKeepZ = false);
+
+
+	ShowEditorToast
 };

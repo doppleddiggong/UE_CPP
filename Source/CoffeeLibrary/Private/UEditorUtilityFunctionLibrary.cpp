@@ -4,6 +4,14 @@
 #include "Styling/SlateIconFinder.h"
 #include "Styling/AppStyle.h"
 #include "UObject/UObjectGlobals.h"
+#include "ScopedTransaction.h"
+
+static FString PadInt(int32 Value, int32 ZeroPad)
+{
+	FString S = FString::FromInt(Value);
+	while (S.Len() < ZeroPad) S = TEXT("0") + S;
+	return S;
+}
 
 FSlateBrush UEditorUtilityFunctionLibrary::GetClassIconBrush(const UClass* InClass, const bool bSmallIcon)
 {
@@ -59,4 +67,67 @@ bool UEditorUtilityFunctionLibrary::MoveActor(TArray<AActor*>& Array, AActor* Ta
 	Array.Swap(From, To);
 	OutNewIndex = To;
 	return true;
+}
+
+void UEditorUtilityFunctionLibrary::ArrangeActorsLinear(TArray<AActor*>& Actors, FVector StepOffset, bool bKeepZ)
+{
+#if WITH_EDITOR
+    Actors.RemoveAll([](AActor* A){ return !IsValid(A); });
+    if (Actors.Num() == 0) return;
+
+	const FScopedTransaction Tx(FText::FromString(TEXT("Arrange Actors Linear")));
+    const FVector Anchor = Actors[0]->GetActorLocation();
+
+    for (int32 i=0; i<Actors.Num(); ++i)
+    {
+        AActor* A = Actors[i];
+        if (!IsValid(A)) continue;
+        A->Modify();
+
+        FVector NewLoc = Anchor + StepOffset * i;
+        if (bKeepZ) NewLoc.Z = A->GetActorLocation().Z;
+
+        A->SetActorLocation(NewLoc, false, nullptr, ETeleportType::TeleportPhysics);
+    }
+#endif
+}
+
+void UEditorUtilityFunctionLibrary::ArrangeAndRename(TArray<AActor*>& Actors, FVector StepOffset,
+    const FString& Prefix, int32 StartIndex, int32 ZeroPad, bool bKeepZ)
+{
+#if WITH_EDITOR
+    Actors.RemoveAll([](AActor* A){ return !IsValid(A); });
+    if (Actors.Num() == 0)
+    	return;
+
+	const FScopedTransaction Tx(FText::FromString(TEXT("Arrange & Rename Actors")));
+    const FVector Anchor = Actors[0]->GetActorLocation();
+
+    for (int32 i=0; i<Actors.Num(); ++i)
+    {
+        AActor* A = Actors[i];
+        if (!IsValid(A))
+        	continue;
+        A->Modify();
+
+        FVector NewLoc = Anchor + StepOffset * i;
+        if (bKeepZ) NewLoc.Z = A->GetActorLocation().Z;
+        A->SetActorLocation(NewLoc, false, nullptr, ETeleportType::TeleportPhysics);
+
+        const FString Label = Prefix + PadInt(StartIndex + i, ZeroPad);
+        A->SetActorLabel(Label, true); // bMarkDirty
+    }
+#endif
+}
+
+void UEditorUtilityFunctionLibrary::ArrangeByFirstForward(TArray<AActor*>& Actors, float Spacing, bool bKeepZ)
+{
+#if WITH_EDITOR
+    Actors.RemoveAll([](AActor* A){ return !IsValid(A); });
+    if (Actors.Num() == 0)
+    	return;
+
+    const FVector Forward = Actors[0]->GetActorForwardVector().GetSafeNormal();
+    ArrangeActorsLinear(Actors, Forward * Spacing, bKeepZ);
+#endif
 }
