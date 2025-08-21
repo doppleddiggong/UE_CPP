@@ -16,11 +16,12 @@
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 
-#define MESH_STATIC_MESH		TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02")
-#define MESH_MATERIAL			TEXT("/Game/StarterContent/Materials/M_Tech_Hex_Tile_Pulse.M_Tech_Hex_Tile_Pulse")
+
+#define MESH_STATIC_MESH		TEXT("/Game/CustomContents/Assets/SpaceShip/Spaceship_ARA.Spaceship_ARA")
+#define MESH_MATERIAL			TEXT("/Game/CustomContents/Assets/SpaceShip/UV.UV")
 
 #define EXPLOSION_VFX			TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion")
-#define EXPLOSION_SOUND			TEXT("/Game/Shooting/Sounds/Explosion.Explosion")
+#define EXPLOSION_SOUND			TEXT("/Game/CustomContents/Assets/Audio/explosion.explosion")
 
 AShootingPawn::AShootingPawn()
 { 
@@ -32,10 +33,14 @@ AShootingPawn::AShootingPawn()
 	
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
-
+	MeshComp->SetRelativeRotation( FRotator(90.0f,0.0f,90.0f));
+	MeshComp->SetRelativeScale3D( FVector(0.1) );
+	
 	FirePoint = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePointComp"));
 	FirePoint->SetupAttachment(MeshComp);
-
+	FirePoint->SetRelativeRotation( FRotator(-90.0f,0.0f,0.0f));
+	FirePoint->SetRelativeLocation( FVector(0.0f, -1285.0f, 0.0f) );
+	
 	MeshComp->SetStaticMesh( FComponentHelper::LoadAsset<UStaticMesh>(MESH_STATIC_MESH));
 	MeshComp->SetMaterial(0, FComponentHelper::LoadAsset<UMaterial>(MESH_MATERIAL));
 	MeshComp->SetGenerateOverlapEvents(false);

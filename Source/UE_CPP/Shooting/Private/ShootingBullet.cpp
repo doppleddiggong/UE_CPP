@@ -10,8 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 
-#define EXPLOSION_VFX		TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion")
-#define EXPLOSION_SOUND		TEXT("/Game/Shooting/Sounds/Explosion.Explosion")
+#define EXPLOSION_VFX			TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion")
+#define EXPLOSION_SOUND			TEXT("/Game/CustomContents/Assets/Audio/explosion.explosion")
 
 AShootingBullet::AShootingBullet()
 {

@@ -8,8 +8,8 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-#define MESH_STATIC_MESH		TEXT("/Engine/VREditor/BasicMeshes/SM_Cube_02.SM_Cube_02")
-#define MESH_MATERIAL			TEXT("/Game/StarterContent/Materials/M_Wood_Pine.M_Wood_Pine")
+#define MESH_STATIC_MESH		TEXT("/Game/CustomContents/Assets/Drone/Drone_low.Drone_low")
+#define MESH_MATERIAL			TEXT("/Game/CustomContents/Assets/Drone/M_Drone.M_Drone")
 
 #define PLAYER_CHANNEL	ECollisionChannel::ECC_GameTraceChannel1
 #define ENEMY_CHANNEL	ECollisionChannel::ECC_GameTraceChannel2
@@ -24,12 +24,15 @@ AShootingEnemy::AShootingEnemy()
 	BoxComp->SetBoxExtent( FVector(50,50,50) );
 	SetRootComponent(BoxComp);
 	
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>
+	(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
-	
 	MeshComp->SetStaticMesh( FComponentHelper::LoadAsset<UStaticMesh>(MESH_STATIC_MESH));
 	MeshComp->SetMaterial(0, FComponentHelper::LoadAsset<UMaterial>(MESH_MATERIAL));
-	
+	MeshComp->SetRelativeRotation( FRotator(0.0f,90.0f,90.0f));
+	MeshComp->SetRelativeLocation( FVector(0.0f,0.0f,-25.0f));
+	MeshComp->SetRelativeScale3D( FVector(0.25) );
+
 	MeshComp->SetGenerateOverlapEvents(false);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
