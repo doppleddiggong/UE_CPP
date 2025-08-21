@@ -19,7 +19,9 @@ void USequenceManager::RequestSequential(const TArray<AActor*>& Targets,
 
 	for (AActor* A : Targets)
 	{
-		if (!IsValid(A)) continue;
+		if (!IsValid(A))
+			continue;
+		
 		FSequenceCommand Cmd;
 		Cmd.Target   = A;
 		Cmd.bActivate = bActivate;
@@ -31,9 +33,7 @@ void USequenceManager::RequestSequential(const TArray<AActor*>& Targets,
 	StepInterval = FMath::Max(0.f, Interval);
 
 	if (!GetWorld() || Queue.Num() == 0)
-	{
 		return;
-	}
 
 	GetWorld()->GetTimerManager().SetTimer(
 		MainHandle,

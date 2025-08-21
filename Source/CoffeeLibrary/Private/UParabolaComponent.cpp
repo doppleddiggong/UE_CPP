@@ -78,10 +78,18 @@ FRotator UParabolaComponent::MakeFacingFromDir(const FVector& Direction, const b
 	FRotator Rot;
 	switch (ForwardAxis)
 	{
-	case EForwardAxis::X: Rot = FRotationMatrix::MakeFromX(Dir).Rotator(); break;
-	case EForwardAxis::Y: Rot = FRotationMatrix::MakeFromY(Dir).Rotator(); break;
-	case EForwardAxis::Z: Rot = FRotationMatrix::MakeFromZ(Dir).Rotator(); break;
-	default:              Rot = FRotationMatrix::MakeFromX(Dir).Rotator(); break;
+	case EForwardAxis::X:
+		Rot = FRotationMatrix::MakeFromX(Dir).Rotator();
+		break;
+	case EForwardAxis::Y:
+		Rot = FRotationMatrix::MakeFromY(Dir).Rotator();
+		break;
+	case EForwardAxis::Z:
+		Rot = FRotationMatrix::MakeFromZ(Dir).Rotator();
+		break;
+	default:
+		Rot = FRotationMatrix::MakeFromX(Dir).Rotator();
+		break;
 	}
 
 	if (bYawOnly)

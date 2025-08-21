@@ -39,7 +39,4 @@ public:
 		UPARAM(ref) TArray<AActor*>& Actors,
 		float Spacing,
 		bool bKeepZ = false);
-
-
-	ShowEditorToast
 };

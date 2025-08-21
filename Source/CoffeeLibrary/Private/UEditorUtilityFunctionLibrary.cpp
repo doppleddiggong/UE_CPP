@@ -9,7 +9,9 @@
 static FString PadInt(int32 Value, int32 ZeroPad)
 {
 	FString S = FString::FromInt(Value);
-	while (S.Len() < ZeroPad) S = TEXT("0") + S;
+
+	while (S.Len() < ZeroPad)
+		S = TEXT("0") + S;
 	return S;
 }
 
@@ -28,7 +30,10 @@ FSlateBrush UEditorUtilityFunctionLibrary::GetClassIconBrush(const UClass* InCla
 			Result = *Brush;
 			if (Result.ImageSize.IsNearlyZero())
 			{
-				Result.ImageSize = FVector2D(bSmallIcon ? 16.f : 32.f, bSmallIcon ? 16.f : 32.f);
+				if ( bSmallIcon )
+					Result.ImageSize = FVector2D(16.f,16.f);	
+				else
+					Result.ImageSize = FVector2D(32.f, 32.f);
 			}
 		}
 	}
@@ -41,8 +46,8 @@ bool UEditorUtilityFunctionLibrary::RemoveActor(TArray<AActor*>& Array, AActor* 
 {
 	if (!IsValid(Target))
 		return false;
+
 	const int32 Idx = Array.IndexOfByKey(Target);
-	
 	if (Idx == INDEX_NONE)
 		return false;
 	
@@ -73,7 +78,8 @@ void UEditorUtilityFunctionLibrary::ArrangeActorsLinear(TArray<AActor*>& Actors,
 {
 #if WITH_EDITOR
     Actors.RemoveAll([](AActor* A){ return !IsValid(A); });
-    if (Actors.Num() == 0) return;
+    if (Actors.Num() == 0)
+    	return;
 
 	const FScopedTransaction Tx(FText::FromString(TEXT("Arrange Actors Linear")));
     const FVector Anchor = Actors[0]->GetActorLocation();
@@ -81,11 +87,13 @@ void UEditorUtilityFunctionLibrary::ArrangeActorsLinear(TArray<AActor*>& Actors,
     for (int32 i=0; i<Actors.Num(); ++i)
     {
         AActor* A = Actors[i];
-        if (!IsValid(A)) continue;
+        if (!IsValid(A))
+        	continue;
         A->Modify();
 
         FVector NewLoc = Anchor + StepOffset * i;
-        if (bKeepZ) NewLoc.Z = A->GetActorLocation().Z;
+        if (bKeepZ)
+        	NewLoc.Z = A->GetActorLocation().Z;
 
         A->SetActorLocation(NewLoc, false, nullptr, ETeleportType::TeleportPhysics);
     }
