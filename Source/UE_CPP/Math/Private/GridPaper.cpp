@@ -3,7 +3,7 @@
 #include "GridPaper.h"
 
 #include "ULog.h"
-#include "FComponentHelper.h"
+#include "Shared/FComponentHelper.h"
 
 #include "Components/ArrowComponent.h"
 

@@ -3,8 +3,8 @@
 
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
-#include "UObjectPoolManager.h"
-#include "FComponentHelper.h"
+#include "Features/UObjectPoolManager.h"
+#include "Shared/FComponentHelper.h"
 
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"

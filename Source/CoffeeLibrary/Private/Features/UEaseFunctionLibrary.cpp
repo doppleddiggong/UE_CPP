@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 
-#include "UEaseFunctionLibrary.h"
-#include "FEaseHelper.h"
+#include "Features/UEaseFunctionLibrary.h"
+#include "Shared/FEaseHelper.h"
 
 static FORCEINLINE float ApplyEase(float Alpha, EEaseType Type)
 {

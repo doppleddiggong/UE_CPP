@@ -2,9 +2,9 @@
 
 
 #include "ShootingEnemy.h"
-#include "UObjectPoolManager.h"
+#include "Features/UObjectPoolManager.h"
+#include "Shared/FComponentHelper.h"
 #include "ShootingPawn.h"
-#include "FComponentHelper.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 

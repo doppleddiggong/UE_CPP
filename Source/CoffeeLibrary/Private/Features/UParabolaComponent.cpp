@@ -1,4 +1,4 @@
-﻿#include "UParabolaComponent.h"
+﻿#include "Features/UParabolaComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Actor.h"
 

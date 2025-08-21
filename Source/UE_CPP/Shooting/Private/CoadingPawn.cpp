@@ -1,7 +1,7 @@
 
 #include "CoadingPawn.h"
 #include "ULog.h"
-#include "FComponentHelper.h"
+#include "Shared/FComponentHelper.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Misc/DateTime.h"

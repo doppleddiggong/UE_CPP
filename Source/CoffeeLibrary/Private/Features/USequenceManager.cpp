@@ -1,10 +1,10 @@
 ﻿// Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 
-#include "USequenceManager.h"
+#include "Features/USequenceManager.h"
+#include "Features/USequenceActivatable.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
-#include "USequenceActivatable.h"
 
 void USequenceManager::RequestSequential(const TArray<AActor*>& Targets,
 										 bool bActivate,

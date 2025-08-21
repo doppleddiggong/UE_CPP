@@ -1,8 +1,7 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "TailActor.h"
-#include "UCoffeeCommonUtil.h"
-
+#include "Features/UCommonFunctionLibrary.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -38,7 +37,7 @@ void ATailActor::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("%s : %d"),
 		*this->GetActorLabel(),
-		UCoffeeCommonUtil::GetFirstNumberInActorLabel(this));
+		UCommonFunctionLibrary::GetFirstNumberInActorLabel(this));
 }
 
 void ATailActor::Tick(float DeltaTime)

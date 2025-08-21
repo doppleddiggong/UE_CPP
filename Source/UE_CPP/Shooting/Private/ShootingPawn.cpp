@@ -1,11 +1,12 @@
 // Copyright (c) 2025 Doppleddiggong. All rights reserved. Unauthorized copying, modification, or distribution of this file, via any medium is strictly prohibited. Proprietary and confidential.
 
 #include "ShootingPawn.h"
-#include "UObjectPoolManager.h"
-#include "UGameEventManager.h"
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
-#include "FComponentHelper.h"
+
+#include "Features/UObjectPoolManager.h"
+#include "Features/UGameEventManager.h"
+#include "Shared/FComponentHelper.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
