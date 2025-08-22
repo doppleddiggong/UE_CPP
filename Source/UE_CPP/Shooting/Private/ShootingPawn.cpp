@@ -58,17 +58,17 @@ void AShootingPawn::BeginPlay()
 	Super::BeginPlay();
 
 	this->ShotCount = 0;
-	this-> Score = 0;
+	this->CurHP = this->MaxHP;
 	
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer() );
 	if ( SubSystem != nullptr )
 		SubSystem->AddMappingContext(IMC_Player,0);
 
-	UGameEventManager::Get(this)->OnScore.AddLambda([&](int InScore) {
-		this->Score += InScore;
-		UE_LOG(LogTemp, Log, TEXT("Game Score: %d"), this->Score);
-	});
+	// UGameEventManager::Get(this)->OnScore.AddLambda([&](int InScore) {
+	// 	this->Score += InScore;
+	// 	UE_LOG(LogTemp, Log, TEXT("Game Score: %d"), this->Score);
+	// });
 
 	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AShootingPawn::OnBoxCompBeginOverlap );
 }
@@ -77,6 +77,17 @@ void AShootingPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	this->UpdateMove(DeltaTime);
+}
+
+void AShootingPawn::DecreaseHP(const int InValue)
+{
+	CurHP -= InValue;
+
+	if ( CurHP < 0 )
+	{
+		this->Destroy();
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+	}
 }
 
 void AShootingPawn::UpdateMove(const float DeltaTime)
@@ -177,6 +188,6 @@ void AShootingPawn::OnBoxCompBeginOverlap(
 		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 		
 		Enemy->ReturnToPool();
-		this->Destroy();
+		this->DecreaseHP(1);
 	}
 }

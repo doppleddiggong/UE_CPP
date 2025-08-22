@@ -9,7 +9,15 @@ public class UE_CPP : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "CoffeeLibrary" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject",
+			"Engine",
+			"InputCore",
+			"EnhancedInput", 
+			"UMG",
+			"CoffeeLibrary"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		

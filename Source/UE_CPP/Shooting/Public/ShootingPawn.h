@@ -26,6 +26,8 @@ public:
 	void OnBoxCompBeginOverlap( UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,bool bFromSweep, const FHitResult& SweepResult);
 
+	void DecreaseHP(int Value);
+	
 private:
 	void UpdateMove(const float DeltaTime);
 
@@ -69,6 +71,11 @@ public:
 	float FireDelay = 1.5f;
 	bool bAutoFire  = false;
 
-	int32 ShotCount = 0;
-	int32 Score = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaxHP = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int CurHP = 3;
+
+	
+	int32 ShotCount = 0;	
 };

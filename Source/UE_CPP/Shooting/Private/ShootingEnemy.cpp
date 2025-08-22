@@ -55,31 +55,12 @@ void AShootingEnemy::BeginPlay()
 			MoveDirection.Normalize();
 		}
 	}
-	
-	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AShootingEnemy::OnBoxCompBeginOverlap);
 }
 
 void AShootingEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	this->UpdateMove(DeltaTime);
-}
-
-void AShootingEnemy::OnBoxCompBeginOverlap(
-	UPrimitiveComponent* OverlappedComp,
-	AActor* OtherActor,
-	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex,
-	bool bFromSweep,
-	const FHitResult& SweepResult)
-{
-	auto* Player = Cast<AShootingPawn>(OtherActor);
-
-	if ( IsValid(Player))
-	{
-		Player->Destroy();
-		ReturnToPool();
-	}
 }
 
 void AShootingEnemy::UpdateMove(const float DeltaTime)

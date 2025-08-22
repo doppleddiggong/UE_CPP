@@ -3,6 +3,8 @@
 
 #include "ShootingBullet.h"
 #include "ShootingEnemy.h"
+#include "ShootingGameMode.h"
+
 #include "Features/UObjectPoolManager.h"
 #include "Shared/FComponentHelper.h"
 
@@ -92,5 +94,9 @@ void AShootingBullet::OnBoxCompBeginOverlap(
 
 		Enemy->ReturnToPool();
 		this->ReturnToPool();
+
+		
+		AShootingGameMode* ShootingGameMode = Cast<AShootingGameMode>( GetWorld()->GetAuthGameMode() );
+		ShootingGameMode->AddScore(1);
 	}
 }
